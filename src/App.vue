@@ -1,10 +1,9 @@
 <template>
   <v-app>
-    <!-- Barre de navigation -->
     <v-app-bar color="primary" prominent>
       <v-app-bar-title>
-        <v-icon icon="mdi-alien" class="mr-2" />
-        Rick & Morty Explorer
+        <v-icon icon="mdi-food-hot-dog" class="mr-2" />
+        Simpsons Explorer
       </v-app-bar-title>
     </v-app-bar>
 
@@ -14,10 +13,15 @@
 
     <v-footer class="text-center">
       <v-col>
-        Démo C141 — ESIG {{ currentYear }} —
+        Démo C141 – ESIG {{ currentYear }} –
         API
-        <a href="https://rickandmortyapi.com" target="_blank" rel="noopener noreferrer" class="text-primary">
-          rickandmortyapi.com
+        <a
+            href="https://thesimpsonsapi.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-primary"
+        >
+          thesimpsonsapi.com
         </a>
       </v-col>
     </v-footer>
