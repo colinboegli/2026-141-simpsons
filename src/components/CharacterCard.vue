@@ -1,9 +1,18 @@
 <template>
   <v-card
-      class="h-100"
+      class="h-100 position-relative"
       :to="`/character/${character.id}`"
       hover
   >
+    <v-btn
+        icon
+        class="position-absolute"
+        style="top: 8px; right: 8px; z-index: 2;"
+        @click.prevent="handleFavoriteClick"
+    >
+      <v-icon :icon="favorite ? 'mdi-heart' : 'mdi-heart-outline'" color="red" />
+    </v-btn>
+
     <img
         :src="characterImage(character)"
         :alt="character.name"
@@ -34,12 +43,26 @@
 </template>
 
 <script setup>
-defineProps({
+import { ref, onMounted } from 'vue'
+import { isFavorite, toggleFavorite } from '@/utils/favorites'
+
+const props = defineProps({
   character: {
     type: Object,
     required: true,
   },
 })
+
+const favorite = ref(false)
+
+onMounted(() => {
+  favorite.value = isFavorite(props.character.id)
+})
+
+function handleFavoriteClick() {
+  const updated = toggleFavorite(props.character.id)
+  favorite.value = updated.includes(props.character.id)
+}
 
 function statusColor(status) {
   const colors = {

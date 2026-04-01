@@ -6,7 +6,7 @@
       Découverte de l’API The Simpsons avec Vue et Vuetify.
     </p>
 
-    <v-alert v-if="loading" type="info" class="mb-4">
+    <v-alert v-if="isLoading" type="info" class="mb-4">
       Chargement des personnages...
     </v-alert>
 
@@ -34,30 +34,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
 import CharacterCard from '@/components/CharacterCard.vue'
+import { useCharacterStore } from '@/stores/characterStore'
+import { storeToRefs } from 'pinia'
 
-const characters = ref([])
-const loading = ref(true)
-const error = ref('')
-
-onMounted(async () => {
-  try {
-    const response = await fetch('https://thesimpsonsapi.com/api/characters')
-
-    if (!response.ok) {
-      throw new Error(`Erreur HTTP ${response.status}`)
-    }
-
-    const data = await response.json()
-
-    characters.value = Array.isArray(data)
-        ? data
-        : data.results || data.data || []
-  } catch (err) {
-    error.value = err.message || 'Erreur inconnue'
-  } finally {
-    loading.value = false
-  }
-})
+const characterStore = useCharacterStore()
+const { characters, isLoading, error } = storeToRefs(characterStore)
 </script>

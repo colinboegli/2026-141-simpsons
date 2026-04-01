@@ -8,7 +8,7 @@
       Retour
     </v-btn>
 
-    <v-alert v-if="loading" type="info" class="mb-4">
+    <v-alert v-if="isLoading" type="info" class="mb-4">
       Chargement du personnage...
     </v-alert>
 
@@ -16,7 +16,11 @@
       {{ error }}
     </v-alert>
 
-    <v-card v-else-if="character" class="pa-4">
+    <v-alert v-else-if="!character" type="error" class="mb-4">
+      Personnage introuvable
+    </v-alert>
+
+    <v-card v-else class="pa-4">
       <img
           :src="characterImage(character)"
           :alt="character.name"
@@ -38,14 +42,18 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { storeToRefs } from 'pinia'
+import { useCharacterStore } from '@/stores/characterStore'
 
 const route = useRoute()
+const characterStore = useCharacterStore()
+const { isLoading, error } = storeToRefs(characterStore)
 
-const character = ref(null)
-const error = ref('')
-const loading = ref(true)
+const character = computed(() => {
+  return characterStore.getCharacterById(route.params.id)
+})
 
 function getImagePath(character) {
   return character.image_path || character.portrait_path || character.image || ''
@@ -88,31 +96,4 @@ function handleImageError(event, character) {
 
   event.target.src = 'https://via.placeholder.com/500x300?text=No+Image'
 }
-
-onMounted(async () => {
-  try {
-    const response = await fetch('https://thesimpsonsapi.com/api/characters')
-
-    if (!response.ok) {
-      throw new Error(`Erreur HTTP ${response.status}`)
-    }
-
-    const data = await response.json()
-
-    const list = Array.isArray(data)
-        ? data
-        : data.results || data.data || []
-
-    character.value = list.find(c => String(c.id) === String(route.params.id))
-
-    if (!character.value) {
-      error.value = 'Personnage introuvable'
-    }
-  } catch (err) {
-    error.value = err.message || 'Erreur lors du chargement'
-    console.error(err)
-  } finally {
-    loading.value = false
-  }
-})
 </script>
