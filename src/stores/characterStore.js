@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import api from '@/plugins/axios'
 
 export const useCharacterStore = defineStore('character', {
     state: () => ({
@@ -12,7 +13,9 @@ export const useCharacterStore = defineStore('character', {
 
         getCharacterById: (state) => {
             return (characterId) => {
-                return state.characters.find(character => String(character.id) === String(characterId))
+                return state.characters.find(
+                    character => String(character.id) === String(characterId)
+                )
             }
         },
     },
@@ -20,17 +23,12 @@ export const useCharacterStore = defineStore('character', {
     actions: {
         async fetchCharacters() {
             try {
-                const response = await fetch('https://thesimpsonsapi.com/api/characters')
+                // Utilisation de l'instance Axios configurée
+                const response = await api.get('/characters')
 
-                if (!response.ok) {
-                    throw new Error(`Erreur HTTP ${response.status}`)
-                }
-
-                const data = await response.json()
-
-                this.characters = Array.isArray(data)
-                    ? data
-                    : data.results || data.data || []
+                this.characters = Array.isArray(response.data)
+                    ? response.data
+                    : response.data.results || response.data.data || []
             } catch (error) {
                 this.error = error.message || 'Erreur lors du chargement des personnages'
                 throw error
