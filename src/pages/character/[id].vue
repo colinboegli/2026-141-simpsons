@@ -20,23 +20,55 @@
       Personnage introuvable
     </v-alert>
 
-    <v-card v-else class="pa-4">
-      <img
-          :src="characterImage(character)"
-          :alt="character.name"
-          style="width: 100%; max-height: 400px; object-fit: contain; display: block;"
-          @error="handleImageError($event, character)"
-      >
+    <v-card v-else class="pa-6">
+      <v-row>
+        <v-col cols="12" md="5" class="text-center">
+          <img
+              :src="characterImage(character)"
+              :alt="character.name"
+              style="width: 100%; max-height: 450px; object-fit: contain;"
+              @error="handleImageError($event, character)"
+          >
+        </v-col>
 
-      <v-card-title class="text-h4">
-        {{ character.name }}
-      </v-card-title>
+        <v-col cols="12" md="7">
+          <v-card-title class="text-h3 pa-0 mb-4">
+            {{ character.name }}
+          </v-card-title>
 
-      <v-card-text>
-        <p><strong>Statut :</strong> {{ character.status || 'Unknown' }}</p>
-        <p><strong>Occupation :</strong> {{ character.occupation || 'Inconnue' }}</p>
-        <p><strong>Âge :</strong> {{ character.age ?? 'Inconnu' }}</p>
-      </v-card-text>
+          <v-chip
+              :color="statusColor(character.status)"
+              class="mr-2 mb-4"
+          >
+            {{ character.status || 'Statut inconnu' }}
+          </v-chip>
+
+          <v-list class="mb-4">
+            <v-list-item title="Occupation" :subtitle="character.occupation || 'Inconnue'" />
+            <v-list-item title="Âge" :subtitle="String(character.age ?? 'Inconnu')" />
+            <v-list-item title="Genre" :subtitle="character.gender || 'Inconnu'" />
+            <v-list-item title="ID" :subtitle="String(character.id)" />
+            <v-list-item title="Nom normalisé" :subtitle="character.normalized_name || 'Non disponible'" />
+          </v-list>
+
+          <v-card v-if="character.phrases?.length" variant="outlined" class="pa-4">
+            <h2 class="text-h5 mb-3">Phrases célèbres</h2>
+
+            <v-list>
+              <v-list-item
+                  v-for="phrase in character.phrases"
+                  :key="phrase"
+                  prepend-icon="mdi-format-quote-close"
+                  :title="phrase"
+              />
+            </v-list>
+          </v-card>
+
+          <v-alert v-else type="info" variant="tonal">
+            Aucune phrase disponible pour ce personnage.
+          </v-alert>
+        </v-col>
+      </v-row>
     </v-card>
   </v-container>
 </template>
@@ -54,6 +86,18 @@ const { isLoading, error } = storeToRefs(characterStore)
 const character = computed(() => {
   return characterStore.getCharacterById(route.params.id)
 })
+
+function statusColor(status) {
+  const colors = {
+    Alive: 'green',
+    Deceased: 'red',
+    Dead: 'red',
+    Unknown: 'grey',
+    unknown: 'grey',
+  }
+
+  return colors[status] || 'grey'
+}
 
 function getImagePath(character) {
   return character.image_path || character.portrait_path || character.image || ''
