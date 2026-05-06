@@ -1,6 +1,6 @@
 <template>
   <v-card
-      class="h-100"
+      class="h-100 character-card"
       :to="`/character/${character.id}`"
       hover
   >
@@ -30,55 +30,16 @@
         Âge : {{ character.age ?? 'Inconnu' }}
       </div>
     </v-card-text>
-
-    <v-card-actions>
-      <v-spacer />
-
-      <v-btn
-          :icon="characterStore.isFavorite(character) ? 'mdi-heart' : 'mdi-heart-outline'"
-          :color="characterStore.isFavorite(character) ? 'red' : ''"
-          variant="text"
-          @click.stop.prevent="handleToggleFavorite"
-      />
-    </v-card-actions>
-
-    <v-snackbar
-        v-model="showSnackbar"
-        :timeout="2000"
-        color="primary"
-    >
-      {{ snackbarMessage }}
-    </v-snackbar>
   </v-card>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useCharacterStore } from '@/stores/characterStore'
-
-const props = defineProps({
+defineProps({
   character: {
     type: Object,
     required: true,
   },
 })
-
-const characterStore = useCharacterStore()
-
-const showSnackbar = ref(false)
-const snackbarMessage = ref('')
-
-function handleToggleFavorite() {
-  const wasFavorite = characterStore.isFavorite(props.character)
-
-  characterStore.toggleFavorite(props.character)
-
-  snackbarMessage.value = wasFavorite
-      ? 'Retiré des favoris'
-      : 'Ajouté aux favoris'
-
-  showSnackbar.value = true
-}
 
 function statusColor(status) {
   const colors = {
@@ -101,9 +62,7 @@ function getImageCandidates(character) {
 
   if (!raw) return []
 
-  if (raw.startsWith('http')) {
-    return [raw]
-  }
+  if (raw.startsWith('http')) return [raw]
 
   const path = raw.startsWith('/') ? raw : `/${raw}`
 
@@ -134,3 +93,15 @@ function handleImageError(event, character) {
   event.target.src = 'https://via.placeholder.com/500x250?text=No+Image'
 }
 </script>
+
+<style scoped>
+.character-card {
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.character-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 30px rgba(255, 222, 0, 0.25);
+}
+</style>
