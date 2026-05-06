@@ -4,34 +4,98 @@ import api from '@/plugins/axios'
 export const useCharacterStore = defineStore('character', {
     state: () => ({
         characters: [],
+        favorites: [],
         isLoading: false,
         error: null,
     }),
 
     getters: {
-        totalCharacters: (state) => state.characters.length,
+        totalCharacters: state => state.characters.length,
 
-        getCharacterById: (state) => {
-            return (characterId) => {
+        totalFavorites: state => state.favorites.length,
+
+        getCharacterById: state => {
+            return characterId => {
                 return state.characters.find(
                     character => String(character.id) === String(characterId)
                 )
             }
         },
+
+        isFavorite: state => {
+            return character => {
+                return state.favorites.includes(character.id)
+            }
+        },
+
+        getFavorites: state => {
+            const favoriteCharacters = state.favorites.map(favoriteId => {
+                return state.characters.find(character => character.id === favoriteId)
+            })
+
+            return favoriteCharacters.filter(character => character !== undefined)
+        },
     },
 
     actions: {
         async fetchCharacters() {
-            try {
-                // Utilisation de l'instance Axios configurée
-                const response = await api.get('/characters')
+            const response = await api.get('/characters')
 
-                this.characters = Array.isArray(response.data)
-                    ? response.data
-                    : response.data.results || response.data.data || []
+            this.characters = Array.isArray(response.data)
+                ? response.data
+                : response.data.results || response.data.data || []
+
+            this.cleanupFavorites()
+        },
+
+        loadFavorites() {
+            try {
+                const savedFavorites = localStorage.getItem('simpsons_favorites')
+
+                if (savedFavorites) {
+                    this.favorites = JSON.parse(savedFavorites)
+                } else {
+                    this.favorites = []
+                }
             } catch (error) {
-                this.error = error.message || 'Erreur lors du chargement des personnages'
-                throw error
+                console.error('Erreur lors du chargement des favoris :', error)
+                this.favorites = []
+            }
+        },
+
+        saveFavorites() {
+            try {
+                localStorage.setItem('simpsons_favorites', JSON.stringify(this.favorites))
+            } catch (error) {
+                console.error('Erreur lors de la sauvegarde des favoris :', error)
+            }
+        },
+
+        toggleFavorite(character) {
+            const favoriteIndex = this.favorites.findIndex(
+                favoriteId => favoriteId === character.id
+            )
+
+            if (favoriteIndex === -1) {
+                this.favorites.push(character.id)
+            } else {
+                this.favorites.splice(favoriteIndex, 1)
+            }
+
+            this.saveFavorites()
+        },
+
+        cleanupFavorites() {
+            const initialCount = this.favorites.length
+
+            this.favorites = this.favorites.filter(favoriteId => {
+                return this.characters.some(character => character.id === favoriteId)
+            })
+
+            const removedCount = initialCount - this.favorites.length
+
+            if (removedCount > 0) {
+                this.saveFavorites()
             }
         },
 
@@ -41,6 +105,8 @@ export const useCharacterStore = defineStore('character', {
 
             try {
                 await this.fetchCharacters()
+                this.loadFavorites()
+                this.cleanupFavorites()
             } catch (error) {
                 this.error = 'Erreur lors du chargement des données'
                 console.error(error)

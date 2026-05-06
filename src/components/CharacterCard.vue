@@ -1,18 +1,9 @@
 <template>
   <v-card
-      class="h-100 position-relative"
+      class="h-100"
       :to="`/character/${character.id}`"
       hover
   >
-    <v-btn
-        icon
-        class="position-absolute"
-        style="top: 8px; right: 8px; z-index: 2;"
-        @click.prevent="handleFavoriteClick"
-    >
-      <v-icon :icon="favorite ? 'mdi-heart' : 'mdi-heart-outline'" color="red" />
-    </v-btn>
-
     <img
         :src="characterImage(character)"
         :alt="character.name"
@@ -39,12 +30,31 @@
         Âge : {{ character.age ?? 'Inconnu' }}
       </div>
     </v-card-text>
+
+    <v-card-actions>
+      <v-spacer />
+
+      <v-btn
+          :icon="characterStore.isFavorite(character) ? 'mdi-heart' : 'mdi-heart-outline'"
+          :color="characterStore.isFavorite(character) ? 'red' : ''"
+          variant="text"
+          @click.stop.prevent="handleToggleFavorite"
+      />
+    </v-card-actions>
+
+    <v-snackbar
+        v-model="showSnackbar"
+        :timeout="2000"
+        color="primary"
+    >
+      {{ snackbarMessage }}
+    </v-snackbar>
   </v-card>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { isFavorite, toggleFavorite } from '@/utils/favorites'
+import { ref } from 'vue'
+import { useCharacterStore } from '@/stores/characterStore'
 
 const props = defineProps({
   character: {
@@ -53,15 +63,21 @@ const props = defineProps({
   },
 })
 
-const favorite = ref(false)
+const characterStore = useCharacterStore()
 
-onMounted(() => {
-  favorite.value = isFavorite(props.character.id)
-})
+const showSnackbar = ref(false)
+const snackbarMessage = ref('')
 
-function handleFavoriteClick() {
-  const updated = toggleFavorite(props.character.id)
-  favorite.value = updated.includes(props.character.id)
+function handleToggleFavorite() {
+  const wasFavorite = characterStore.isFavorite(props.character)
+
+  characterStore.toggleFavorite(props.character)
+
+  snackbarMessage.value = wasFavorite
+      ? 'Retiré des favoris'
+      : 'Ajouté aux favoris'
+
+  showSnackbar.value = true
 }
 
 function statusColor(status) {
