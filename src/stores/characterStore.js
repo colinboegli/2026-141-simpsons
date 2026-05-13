@@ -17,7 +17,7 @@ export const useCharacterStore = defineStore('character', {
         getCharacterById: state => {
             return characterId => {
                 return state.characters.find(
-                    character => String(character.id) === String(characterId)
+                    character => String(character.id) === String(characterId),
                 )
             }
         },
@@ -48,6 +48,44 @@ export const useCharacterStore = defineStore('character', {
             this.cleanupFavorites()
         },
 
+        async addCharacter(characterData) {
+            if (!characterData.name || !characterData.status) {
+                return {
+                    success: false,
+                    message: 'Le nom et le statut du personnage sont obligatoires',
+                }
+            }
+
+            this.isLoading = true
+
+            try {
+                const response = await api.post('/characters', characterData)
+                const newCharacter = response.data
+
+                this.characters.push(newCharacter)
+
+                return {
+                    success: true,
+                    message: 'Personnage ajouté avec succès !',
+                }
+            } catch (error) {
+                console.error('Erreur lors de l’ajout du personnage :', error.message)
+
+                let errorMessage = 'Erreur lors de l’ajout du personnage'
+
+                if (error.response?.data?.message) {
+                    errorMessage = error.response.data.message
+                }
+
+                return {
+                    success: false,
+                    message: errorMessage,
+                }
+            } finally {
+                this.isLoading = false
+            }
+        },
+
         loadFavorites() {
             try {
                 const savedFavorites = localStorage.getItem('simpsons_favorites')
@@ -73,7 +111,7 @@ export const useCharacterStore = defineStore('character', {
 
         toggleFavorite(character) {
             const favoriteIndex = this.favorites.findIndex(
-                favoriteId => favoriteId === character.id
+                favoriteId => favoriteId === character.id,
             )
 
             if (favoriteIndex === -1) {

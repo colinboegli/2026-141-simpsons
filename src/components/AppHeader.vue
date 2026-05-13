@@ -1,7 +1,6 @@
 <template>
   <v-app-bar class="app-header" height="72" flat>
     <v-container class="d-flex align-center justify-space-between">
-
       <router-link to="/" class="brand">
         <span class="brand-icon">🍩</span>
         <span class="brand-text">Simpsons Explorer</span>
@@ -19,7 +18,6 @@
           {{ link.title }}
         </v-btn>
       </div>
-
     </v-container>
   </v-app-bar>
 </template>
@@ -28,6 +26,7 @@
 const menuItems = [
   { title: 'Accueil', path: '/', icon: 'mdi-home' },
   { title: 'Favoris', path: '/favoris', icon: 'mdi-heart' },
+  { title: 'Ajouter', path: '/ajouter', icon: 'mdi-plus-circle' },
   { title: 'À propos', path: '/a-propos', icon: 'mdi-information' },
 ]
 </script>
