@@ -4,6 +4,18 @@
       :to="`/character/${character.id}`"
       hover
   >
+    <v-btn
+        icon
+        variant="text"
+        class="favorite-btn"
+        @click.stop.prevent="handleToggleFavorite"
+    >
+      <v-icon
+          :icon="characterStore.isFavorite(character) ? 'mdi-heart' : 'mdi-heart-outline'"
+          color="red"
+      />
+    </v-btn>
+
     <img
         :src="characterImage(character)"
         :alt="character.name"
@@ -30,16 +42,44 @@
         Âge : {{ character.age ?? 'Inconnu' }}
       </div>
     </v-card-text>
+
+    <v-snackbar
+        v-model="showSnackbar"
+        :timeout="2000"
+        color="primary"
+    >
+      {{ snackbarMessage }}
+    </v-snackbar>
   </v-card>
 </template>
 
 <script setup>
-defineProps({
+import { ref } from 'vue'
+import { useCharacterStore } from '@/stores/characterStore'
+
+const props = defineProps({
   character: {
     type: Object,
     required: true,
   },
 })
+
+const characterStore = useCharacterStore()
+
+const showSnackbar = ref(false)
+const snackbarMessage = ref('')
+
+function handleToggleFavorite() {
+  const wasFavorite = characterStore.isFavorite(props.character)
+
+  characterStore.toggleFavorite(props.character)
+
+  snackbarMessage.value = wasFavorite
+      ? 'Retiré des favoris'
+      : 'Ajouté aux favoris'
+
+  showSnackbar.value = true
+}
 
 function statusColor(status) {
   const colors = {
@@ -96,6 +136,7 @@ function handleImageError(event, character) {
 
 <style scoped>
 .character-card {
+  position: relative;
   cursor: pointer;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
@@ -103,5 +144,14 @@ function handleImageError(event, character) {
 .character-card:hover {
   transform: translateY(-6px);
   box-shadow: 0 12px 30px rgba(255, 222, 0, 0.25);
+}
+
+.favorite-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 5;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
 }
 </style>
