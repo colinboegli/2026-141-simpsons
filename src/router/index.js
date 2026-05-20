@@ -4,6 +4,7 @@ import HomeView from '@/pages/index.vue'
 import AboutView from '@/pages/about.vue'
 import AproposView from '@/pages/a-propos.vue'
 import FavorisView from '@/pages/favoris.vue'
+import AjouterView from '@/pages/ajouter.vue'
 import CharacterDetailView from '@/pages/character/[id].vue'
 
 const router = createRouter({
@@ -28,6 +29,11 @@ const router = createRouter({
       path: '/favoris',
       name: 'favoris',
       component: FavorisView,
+    },
+    {
+      path: '/ajouter',
+      name: 'ajouter',
+      component: AjouterView,
     },
     {
       path: '/character/:id',

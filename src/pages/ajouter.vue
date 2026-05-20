@@ -1,7 +1,12 @@
 <template>
   <v-container class="py-8">
-    <v-card class="pa-6" max-width="800" rounded="xl">
-      <h1 class="text-h3 mb-6">
+    <v-card
+        class="pa-8 mx-auto"
+        max-width="800"
+        rounded="xl"
+        color="#1e1e1e"
+    >
+      <h1 class="text-h3 mb-6 text-yellow">
         Ajouter un personnage
       </h1>
 
@@ -27,7 +32,6 @@
             v-model.number="form.age"
             label="Âge"
             type="number"
-            min="0"
             variant="outlined"
             class="mb-4"
         />
@@ -49,18 +53,18 @@
         <v-textarea
             v-model="form.description"
             label="Description"
-            rows="3"
+            rows="4"
             variant="outlined"
-            class="mb-4"
+            class="mb-6"
         />
 
         <v-btn
             type="submit"
-            color="primary"
+            color="yellow-darken-1"
             size="large"
-            :loading="characterStore.isLoading"
+            block
         >
-          Ajouter
+          Ajouter le personnage
         </v-btn>
       </v-form>
     </v-card>
@@ -74,7 +78,6 @@
     </v-snackbar>
   </v-container>
 </template>
-
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -84,6 +87,12 @@ const router = useRouter()
 const characterStore = useCharacterStore()
 
 const formRef = ref(null)
+
+const snackbar = ref({
+  show: false,
+  message: '',
+  color: 'success',
+})
 
 const form = ref({
   name: '',
@@ -101,19 +110,12 @@ const statusOptions = [
 ]
 
 const nameRules = [
-  value => !!value || 'Le nom est obligatoire',
-  value => value.length >= 2 || 'Le nom doit contenir au moins 2 caractères',
+  v => !!v || 'Le nom est obligatoire',
 ]
 
 const statusRules = [
-  value => !!value || 'Le statut est obligatoire',
+  v => !!v || 'Le statut est obligatoire',
 ]
-
-const snackbar = ref({
-  show: false,
-  message: '',
-  color: 'success',
-})
 
 async function submitForm() {
   const { valid } = await formRef.value.validate()
@@ -135,3 +137,9 @@ async function submitForm() {
   }
 }
 </script>
+
+<style scoped>
+.text-yellow {
+  color: #ffde00;
+}
+</style>

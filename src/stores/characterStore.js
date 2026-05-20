@@ -30,10 +30,14 @@ export const useCharacterStore = defineStore('character', {
 
         getFavorites: state => {
             const favoriteCharacters = state.favorites.map(favoriteId => {
-                return state.characters.find(character => character.id === favoriteId)
+                return state.characters.find(
+                    character => character.id === favoriteId,
+                )
             })
 
-            return favoriteCharacters.filter(character => character !== undefined)
+            return favoriteCharacters.filter(
+                character => character !== undefined,
+            )
         },
     },
 
@@ -56,33 +60,21 @@ export const useCharacterStore = defineStore('character', {
                 }
             }
 
-            this.isLoading = true
+            const newCharacter = {
+                id: Date.now(),
+                name: characterData.name,
+                status: characterData.status,
+                age: characterData.age || null,
+                occupation: characterData.occupation || 'Inconnue',
+                image: characterData.image || '',
+                description: characterData.description || '',
+            }
 
-            try {
-                const response = await api.post('/characters', characterData)
-                const newCharacter = response.data
+            this.characters.unshift(newCharacter)
 
-                this.characters.push(newCharacter)
-
-                return {
-                    success: true,
-                    message: 'Personnage ajouté avec succès !',
-                }
-            } catch (error) {
-                console.error('Erreur lors de l’ajout du personnage :', error.message)
-
-                let errorMessage = 'Erreur lors de l’ajout du personnage'
-
-                if (error.response?.data?.message) {
-                    errorMessage = error.response.data.message
-                }
-
-                return {
-                    success: false,
-                    message: errorMessage,
-                }
-            } finally {
-                this.isLoading = false
+            return {
+                success: true,
+                message: 'Personnage ajouté localement avec succès !',
             }
         },
 
@@ -103,7 +95,10 @@ export const useCharacterStore = defineStore('character', {
 
         saveFavorites() {
             try {
-                localStorage.setItem('simpsons_favorites', JSON.stringify(this.favorites))
+                localStorage.setItem(
+                    'simpsons_favorites',
+                    JSON.stringify(this.favorites),
+                )
             } catch (error) {
                 console.error('Erreur lors de la sauvegarde des favoris :', error)
             }
@@ -127,7 +122,9 @@ export const useCharacterStore = defineStore('character', {
             const initialCount = this.favorites.length
 
             this.favorites = this.favorites.filter(favoriteId => {
-                return this.characters.some(character => character.id === favoriteId)
+                return this.characters.some(
+                    character => character.id === favoriteId,
+                )
             })
 
             const removedCount = initialCount - this.favorites.length
