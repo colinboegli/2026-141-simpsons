@@ -1,73 +1,109 @@
-# Rick & Morty Explorer
+# Simpsons Explorer
 
-Application Vue.js 3 + Vuetify 3 — code de départ pour le cours C141.
+Application Vue.js 3 permettant d’explorer les personnages emblématiques des Simpson.
 
-**[Voir la démo en ligne](https://fallinov.github.io/esig-141-demo-vuetify-api/)**
+## Démo en ligne
 
-![Page d'accueil](docs/screenshots/home.png)
+https://2026-141-simpsons.vercel.app
 
-## Objectif
+## Fonctionnalités
 
-Compléter l'application en suivant les étapes du cours :
+- Liste des personnages
+- Recherche par nom
+- Filtre par statut
+- Tri alphabétique
+- Page détail dynamique
+- Ajout aux favoris
+- Persistance des favoris avec localStorage
+- Ajout de personnages personnalisés
+- Suppression de personnages
+- Authentification factice
+- Protection de routes
+- Design responsive mobile et desktop
 
-0. **Config** — Palette de couleurs Rick & Morty + favicon
-1. **Découvrir l'API** — Requête GET dans Bruno, explorer le JSON
-2. **API + affichage** — Charger et afficher les personnages avec `fetch()`
-3. **Page statique** — Remplir la page À propos avec des composants Vuetify
-4. **Navigation** — Ajouter un menu de navigation latéral
-5. **Déploiement** — Déployer sur Vercel
-6. **Fiche détail** (bonus) — Route dynamique, page détail d'un personnage
+## Technologies utilisées
 
-La branche [`solution`](https://github.com/fallinov/esig-141-demo-vuetify-api/tree/solution) contient le résultat final. Voir [`etapes-demo.md`](etapes-demo.md) pour le guide complet.
-
-## Aperçu de la solution
-
-| Page d'accueil | Fiche détail | À propos |
-|:-:|:-:|:-:|
-| ![Accueil](docs/screenshots/home.png) | ![Détail](docs/screenshots/character-detail.png) | ![À propos](docs/screenshots/about.png) |
+- Vue.js 3
+- Vuetify 3
+- Pinia
+- Axios
+- Vue Router
+- Vercel
 
 ## Installation
 
 ```bash
-git clone https://github.com/fallinov/esig-141-demo-vuetify-api.git
-cd esig-141-demo-vuetify-api
 npm install
 npm run dev
 ```
 
-L'application s'ouvre sur [http://localhost:3000](http://localhost:3000).
+## Variables d’environnement
 
-## Structure
+Créer un fichier `.env` :
 
+```env
+VITE_API_URL=https://thesimpsonsapi.com/api
 ```
-public/
-├── favicon.ico          # Favicon multi-tailles (16, 32, 48px)
-└── favicon.png          # Favicon PNG (silhouettes Rick & Morty)
+
+## API utilisée
+
+https://thesimpsonsapi.com/
+
+Endpoint utilisé :
+
+- `/characters`
+
+## Structure du projet
+
+```text
 src/
-├── App.vue              # Layout (app-bar + footer)
-├── main.js              # Point d'entrée
+├── components/
 ├── pages/
-│   ├── index.vue        # TODO : Liste des personnages (route /)
-│   └── about.vue        # TODO : Page statique (route /about)
+├── stores/
 ├── plugins/
-│   ├── index.js         # Enregistrement des plugins
-│   └── vuetify.js       # Configuration Vuetify (dark theme)
 ├── router/
-│   └── index.js         # Routes auto-générées (unplugin-vue-router)
-└── stores/
-    └── index.js         # Pinia store
 ```
 
-## API Rick and Morty
+## Captures d’écran
 
-- **URL** : [`https://rickandmortyapi.com/api/character`](https://rickandmortyapi.com/api/character)
-- **Documentation** : [rickandmortyapi.com/documentation](https://rickandmortyapi.com/documentation)
-- **Réponse** : `{ info: {...}, results: [...] }`
-- **Champs utiles** : `id`, `name`, `status`, `species`, `image`
+### Accueil
 
-## Stack
+![Accueil](docs/screenshots/home.png)
 
-- [Vue.js 3](https://vuejs.org/) — Composition API
-- [Vuetify 3](https://vuetifyjs.com/) — Composants Material Design
-- [Vue Router 4](https://router.vuejs.org/) + unplugin-vue-router (routage automatique)
-- [Vite](https://vitejs.dev/) — Build tool
+### Détail personnage
+
+![Détail](docs/screenshots/detail.png)
+
+### Favoris personnages
+
+![Favoris](docs/screenshots/favoris.png)
+
+### Ajouter personnages
+
+![Ajouter](docs/screenshots/ajouter.png)
+
+### À propos
+
+![About](docs/screenshots/carte.png)
+
+### Connexion
+
+![Connexion](docs/screenshots/connexion.png)
+
+## Authentification de démonstration
+
+```text
+Email : homer@simpsons.com
+Mot de passe : donut
+```
+
+## Transparence IA
+
+L’intelligence artificielle a été utilisée comme assistance pour :
+
+- amélioration du design
+- génération de composants Vue/Vuetify
+- corrections de bugs
+- optimisation du responsive design
+
+Le projet a ensuite été compris, modifié et adapté manuellement.
