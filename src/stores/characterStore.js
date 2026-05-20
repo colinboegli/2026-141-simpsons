@@ -1,9 +1,13 @@
 import { defineStore } from 'pinia'
 import api from '@/plugins/axios'
 
+const FAVORITES_KEY = 'simpsons_favorites'
+const CUSTOM_CHARACTERS_KEY = 'simpsons_custom_characters'
+
 export const useCharacterStore = defineStore('character', {
     state: () => ({
         characters: [],
+        customCharacters: [],
         favorites: [],
         isLoading: false,
         error: null,
@@ -29,14 +33,8 @@ export const useCharacterStore = defineStore('character', {
         },
 
         getFavorites: state => {
-            const favoriteCharacters = state.favorites.map(favoriteId => {
-                return state.characters.find(
-                    character => character.id === favoriteId,
-                )
-            })
-
-            return favoriteCharacters.filter(
-                character => character !== undefined,
+            return state.characters.filter(character =>
+                state.favorites.includes(character.id),
             )
         },
     },
@@ -45,63 +43,114 @@ export const useCharacterStore = defineStore('character', {
         async fetchCharacters() {
             const response = await api.get('/characters')
 
-            this.characters = Array.isArray(response.data)
+            const apiCharacters = Array.isArray(response.data)
                 ? response.data
                 : response.data.results || response.data.data || []
 
+            this.characters = [
+                ...this.customCharacters,
+                ...apiCharacters,
+            ]
+
             this.cleanupFavorites()
+        },
+
+        loadCustomCharacters() {
+            try {
+                const savedCharacters = localStorage.getItem(CUSTOM_CHARACTERS_KEY)
+                this.customCharacters = savedCharacters
+                    ? JSON.parse(savedCharacters)
+                    : []
+            } catch (error) {
+                console.error('Erreur chargement personnages ajoutés :', error)
+                this.customCharacters = []
+            }
+        },
+
+        saveCustomCharacters() {
+            localStorage.setItem(
+                CUSTOM_CHARACTERS_KEY,
+                JSON.stringify(this.customCharacters),
+            )
         },
 
         async addCharacter(characterData) {
             if (!characterData.name || !characterData.status) {
                 return {
                     success: false,
-                    message: 'Le nom et le statut du personnage sont obligatoires',
+                    message: 'Le nom et le statut sont obligatoires',
                 }
             }
 
             const newCharacter = {
-                id: Date.now(),
+                id: `custom-${Date.now()}`,
                 name: characterData.name,
                 status: characterData.status,
                 age: characterData.age || null,
                 occupation: characterData.occupation || 'Inconnue',
                 image: characterData.image || '',
                 description: characterData.description || '',
+                custom: true,
             }
 
+            this.customCharacters.unshift(newCharacter)
             this.characters.unshift(newCharacter)
+
+            this.saveCustomCharacters()
 
             return {
                 success: true,
-                message: 'Personnage ajouté localement avec succès !',
+                message: 'Personnage ajouté avec succès !',
+            }
+        },
+
+        async deleteCharacter(characterId) {
+            this.isLoading = true
+
+            try {
+                this.characters = this.characters.filter(
+                    character => String(character.id) !== String(characterId),
+                )
+
+                this.customCharacters = this.customCharacters.filter(
+                    character => String(character.id) !== String(characterId),
+                )
+
+                this.favorites = this.favorites.filter(
+                    favoriteId => String(favoriteId) !== String(characterId),
+                )
+
+                this.saveCustomCharacters()
+                this.saveFavorites()
+
+                return {
+                    success: true,
+                    message: 'Personnage supprimé avec succès !',
+                }
+            } catch (error) {
+                console.error(error)
+
+                return {
+                    success: false,
+                    message: 'Erreur lors de la suppression',
+                }
+            } finally {
+                this.isLoading = false
             }
         },
 
         loadFavorites() {
             try {
-                const savedFavorites = localStorage.getItem('simpsons_favorites')
-
-                if (savedFavorites) {
-                    this.favorites = JSON.parse(savedFavorites)
-                } else {
-                    this.favorites = []
-                }
+                const savedFavorites = localStorage.getItem(FAVORITES_KEY)
+                this.favorites = savedFavorites ? JSON.parse(savedFavorites) : []
             } catch (error) {
-                console.error('Erreur lors du chargement des favoris :', error)
+                console.error('Erreur chargement favoris :', error)
                 this.favorites = []
             }
         },
 
         saveFavorites() {
-            try {
-                localStorage.setItem(
-                    'simpsons_favorites',
-                    JSON.stringify(this.favorites),
-                )
-            } catch (error) {
-                console.error('Erreur lors de la sauvegarde des favoris :', error)
-            }
+            localStorage.setItem(FAVORITES_KEY, JSON.stringify(this.favorites))
         },
 
         toggleFavorite(character) {
@@ -119,19 +168,11 @@ export const useCharacterStore = defineStore('character', {
         },
 
         cleanupFavorites() {
-            const initialCount = this.favorites.length
-
             this.favorites = this.favorites.filter(favoriteId => {
-                return this.characters.some(
-                    character => character.id === favoriteId,
-                )
+                return this.characters.some(character => character.id === favoriteId)
             })
 
-            const removedCount = initialCount - this.favorites.length
-
-            if (removedCount > 0) {
-                this.saveFavorites()
-            }
+            this.saveFavorites()
         },
 
         async init() {
@@ -139,9 +180,9 @@ export const useCharacterStore = defineStore('character', {
             this.error = null
 
             try {
-                await this.fetchCharacters()
+                this.loadCustomCharacters()
                 this.loadFavorites()
-                this.cleanupFavorites()
+                await this.fetchCharacters()
             } catch (error) {
                 this.error = 'Erreur lors du chargement des données'
                 console.error(error)
