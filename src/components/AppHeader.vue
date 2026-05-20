@@ -20,7 +20,7 @@
 
       <div class="nav-links">
         <v-btn
-            v-for="link in menuItems"
+            v-for="link in visibleMenuItems"
             :key="link.title"
             :to="link.path"
             variant="text"
@@ -29,34 +29,64 @@
         >
           {{ link.title }}
         </v-btn>
+
+        <v-btn
+            v-if="authStore.isAuthenticated"
+            variant="text"
+            class="nav-btn"
+            prepend-icon="mdi-logout"
+            @click="handleLogout"
+        >
+          Déconnexion
+        </v-btn>
+
+        <v-btn
+            v-else
+            to="/login"
+            variant="text"
+            class="nav-btn"
+            prepend-icon="mdi-login"
+        >
+          Connexion
+        </v-btn>
       </div>
     </v-container>
+
+    <v-snackbar
+        v-model="showSnackbar"
+        :timeout="2000"
+        color="primary"
+    >
+      Déconnexion réussie
+    </v-snackbar>
   </v-app-bar>
 </template>
 
 <script setup>
+import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/authStore'
+
+const router = useRouter()
+const authStore = useAuthStore()
+const showSnackbar = ref(false)
+
 const menuItems = [
-  {
-    title: 'Accueil',
-    path: '/',
-    icon: 'mdi-home',
-  },
-  {
-    title: 'Favoris',
-    path: '/favoris',
-    icon: 'mdi-heart',
-  },
-  {
-    title: 'Ajouter',
-    path: '/ajouter',
-    icon: 'mdi-plus-circle',
-  },
-  {
-    title: 'À propos',
-    path: '/a-propos',
-    icon: 'mdi-information',
-  },
+  { title: 'Accueil', path: '/', icon: 'mdi-home' },
+  { title: 'Favoris', path: '/favoris', icon: 'mdi-heart' },
+  { title: 'Ajouter', path: '/ajouter', icon: 'mdi-plus-circle', protected: true },
+  { title: 'À propos', path: '/a-propos', icon: 'mdi-information' },
 ]
+
+const visibleMenuItems = computed(() => {
+  return menuItems.filter(item => !item.protected || authStore.isAuthenticated)
+})
+
+function handleLogout() {
+  authStore.logout()
+  showSnackbar.value = true
+  router.push('/')
+}
 </script>
 
 <style scoped>
